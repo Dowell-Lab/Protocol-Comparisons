@@ -1,0 +1,9 @@
+## juoyter notebook tracking
+.ipynb_checkpoints/
+
+## Compiled python modules.
+*.pyc
+*.py~
+
+## Files being edited
+*~
