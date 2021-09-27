@@ -159,6 +159,9 @@ def coverage_norm(cov):
     cov_new = []
    
     for i in range(len(cov)):
+        #try:                                                                                                                                                                                                                                  
+        #_cov_new = (cov[i] - min_cov)/(max_cov-min_cov)                                                                                                                                                                                       
+        #cov_new.append(_cov_new)   
         try:
             _cov_new = (cov[i] - min_cov)/(max_cov-min_cov)
             cov_new.append(_cov_new)

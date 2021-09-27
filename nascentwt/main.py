@@ -6,6 +6,7 @@ import sys
 import pywt
 import pandas as pd
 import numpy as np
+import time
 from scipy.stats import entropy
 from scipy.stats import pearsonr
 from sklearn.decomposition import PCA
@@ -19,8 +20,8 @@ import matplotlib.patches as mpatches
 # Local imports                                                                                                                                                                     
 #----------------------------------------                
 
-from region_extraction import *
-from wavelet_transforms import *
+from region_extraction import bedgraph_awk,bedgraph_awk_strand,coverage_norm,extract_regions,expand_bedgraph
+from wavelet_transforms import dwt_coefficients,dwt_coverage_figure,multiple_run
 
 #load files
 def read_annotations(annotations:str):
@@ -110,16 +111,18 @@ def load_bedgraph(bedgraphs):
 def get_pca_summary(dwt_ad:list, ordered_protocol:list,ordered_library:list,pcs=2):
 
     def color_row(row):
-        
+        #val = 'NA'
         if row['protocol'] == 'GRO':
             val = 0
         elif row['protocol'] == 'PRO':
             val = 1
         else:
+            #pass
             val = 'NA'
         return val
 
     def color_library(row):
+        #val = 'NA'
         if row['library'] == 'LIG':
             val = 0
         elif row['library'] == 'CIRC':
@@ -129,6 +132,7 @@ def get_pca_summary(dwt_ad:list, ordered_protocol:list,ordered_library:list,pcs=
         elif row['library'] == 'RPR':
             val = 3
         else:
+            #pass
             val = 'NA'
         return val
 
@@ -150,6 +154,7 @@ def get_pca_summary(dwt_ad:list, ordered_protocol:list,ordered_library:list,pcs=
                                pc2=pca_results[:, 1],
                                pc3=pca_results[:, 2],
                                pc4=pca_results[:, 3],
+                               #nascent=ordered_nascent,
                               protocol=ordered_protocol,
                               library=ordered_library))
     pca_df['color'] = pca_df.apply(color_row, axis=1)
@@ -196,7 +201,7 @@ def plot_pca(pca_df,pca,gene,wavefxn,outdir,protocol_color=True):
         plt.xticks(fontsize=16)
         plt.yticks(fontsize=16)
         plt.savefig(outdir +'{}_{}_pc1pc2.png'.format(gene,wavefxn),bbox_inches='tight')
-        
+        #plt.cla()
         plt.close()
     else:
         
@@ -216,7 +221,7 @@ def plot_pca(pca_df,pca,gene,wavefxn,outdir,protocol_color=True):
         
         patch1 = mpatches.Patch(color='#E41A1C', label='Ligation')
         patch2 = mpatches.Patch(color='#377EB8', label='Circularization')
-        patch3 = mpatches.Patch(color='#4DAF4A', label='TSRT')
+        patch3 = mpatches.Patch(color='#4DAF4A', label='TSRT')#'Template-Switching \n Reverse Transcription')
 
 
         plt.legend(handles=[patch1, patch2, patch3],fontsize=14)
@@ -224,6 +229,7 @@ def plot_pca(pca_df,pca,gene,wavefxn,outdir,protocol_color=True):
         plt.yticks(fontsize=16)
         plt.savefig(outdir +'{}_{}_pc1pc2_libprep.png'.format(gene,wavefxn),bbox_inches='tight')
         
+        #plt.cla()
         plt.close()
 
 
@@ -235,6 +241,7 @@ def run(sample_paths:str, outdir:str, gene_annotations_path:str, wavelet:str, pl
 
     sample_inf, samples, protocol, library = load_bedgraph(sample_paths)
 
+    #pca_results = []
     pca_summary = []
     pc1_results = []
     pc2_results = []
